@@ -2,6 +2,7 @@
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from backend.config import CORS_ORIGINS
 from backend.routes import leads, chat
 
@@ -24,6 +25,9 @@ app.add_middleware(
 # Include routers
 app.include_router(leads.router, prefix="/leads", tags=["leads"])
 app.include_router(chat.router, prefix="/chat", tags=["chat"])
+
+# Mount static files for Chat UI
+app.mount("/chat-ui", StaticFiles(directory="frontend", html=True), name="frontend")
 
 @app.get("/", tags=["health"])
 async def root():

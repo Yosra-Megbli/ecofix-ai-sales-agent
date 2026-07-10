@@ -47,6 +47,8 @@ async def chat(request: ChatRequest):
             sessions[session_id] = {
                 "messages": [],
                 "conversation_turn": 0,
+                "lead_id": None,
+                "lead_info": {},
             }
         
         state = sessions[session_id]
@@ -61,6 +63,8 @@ async def chat(request: ChatRequest):
         # Update state with result
         state["messages"] = result.get("messages", state["messages"])
         state["conversation_turn"] = result.get("conversation_turn", state["conversation_turn"])
+        state["lead_id"] = result.get("lead_id", state.get("lead_id"))
+        state["lead_info"] = result.get("lead_info", state.get("lead_info"))
         
         # Get last assistant message (the response)
         assistant_messages = [m["content"] for m in state["messages"] if m["role"] == "assistant"]
@@ -98,6 +102,8 @@ async def start_chat(session_id: str):
         sessions[session_id] = {
             "messages": [],
             "conversation_turn": 0,
+            "lead_id": None,
+            "lead_info": {},
         }
         
         state = sessions[session_id]
@@ -140,5 +146,7 @@ async def get_chat_history(session_id: str):
         "session_id": session_id,
         "messages": messages,
         "turn": state.get("conversation_turn", 0),
+        "lead_id": state.get("lead_id"),
+        "lead_info": state.get("lead_info"),
     }
 

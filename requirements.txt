@@ -7,3 +7,4 @@ uvicorn[standard]==0.24.0
 langchain==0.1.14
 langgraph==0.0.39
 langchain-google-genai==0.0.13
+aiofiles==23.2.1

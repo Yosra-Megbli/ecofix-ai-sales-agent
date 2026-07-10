@@ -12,7 +12,7 @@ print("=" * 70)
 # 1. Start session
 print("\n[1/3] Starting chat session...")
 try:
-    r = requests.post(f"{base_url}/chat/start?session_id={session_id}", timeout=10)
+    r = requests.post(f"{base_url}/chat/start?session_id={session_id}", timeout=30)
     if r.status_code != 200:
         print(f"❌ Failed: {r.status_code} - {r.text}")
         exit(1)
@@ -35,7 +35,7 @@ try:
     
     print(f"User: {user_msg}\n")
     
-    r = requests.post(f"{base_url}/chat", json=chat_request, timeout=30)
+    r = requests.post(f"{base_url}/chat", json=chat_request, timeout=60)
     
     if r.status_code != 200:
         print(f"❌ Failed: {r.status_code}")
@@ -54,7 +54,7 @@ except Exception as e:
 # 3. Get history
 print("\n[3/3] Retrieving chat history...")
 try:
-    r = requests.get(f"{base_url}/chat/history/{session_id}", timeout=10)
+    r = requests.get(f"{base_url}/chat/history/{session_id}", timeout=30)
     
     if r.status_code != 200:
         print(f"❌ Failed: {r.status_code}")

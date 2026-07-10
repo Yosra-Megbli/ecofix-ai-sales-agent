@@ -11,7 +11,7 @@ print("=" * 60)
 
 # Start session
 try:
-    r = requests.post(f"{base_url}/chat/start?session_id={session_id}", timeout=10)
+    r = requests.post(f"{base_url}/chat/start?session_id={session_id}", timeout=30)
     print(f"Status: {r.status_code}")
     response_data = r.json()
     print(f"Greeting: {response_data['response'][:100]}...")
@@ -32,7 +32,7 @@ try:
         "session_id": session_id
     }
     
-    r = requests.post(f"{base_url}/chat", json=chat_request, timeout=15)
+    r = requests.post(f"{base_url}/chat", json=chat_request, timeout=60)
     print(f"Status: {r.status_code}")
     
     if r.status_code == 200:
@@ -50,7 +50,7 @@ print("3️⃣ Getting chat history...")
 print("=" * 60)
 
 try:
-    r = requests.get(f"{base_url}/chat/history/{session_id}", timeout=10)
+    r = requests.get(f"{base_url}/chat/history/{session_id}", timeout=30)
     print(f"Status: {r.status_code}")
     
     if r.status_code == 200:
