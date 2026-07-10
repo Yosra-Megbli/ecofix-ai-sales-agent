@@ -36,6 +36,9 @@ async def get_dashboard():
     """Serve dashboard HTML page."""
     return FileResponse("frontend/dashboard.html")
 
+# Root static files mount to serve assets for root-level routes
+app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend_root")
+
 @app.get("/", tags=["health"])
 async def root():
     """Health check endpoint."""
