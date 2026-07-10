@@ -263,26 +263,25 @@ def process_message_node(state: GraphState) -> Dict[str, Any]:
         
         # Query RAG
         rag_context = ""
+        is_off_topic = False
         if latest_user_message:
             try:
                 index = get_rag_index()
-                chunks = index.retrieve(latest_user_message, top_n=2)
-                if chunks:
+                rag_res = index.retrieve(latest_user_message, top_n=2)
+                chunks = rag_res.get("chunks", [])
+                max_score = rag_res.get("max_score", 0.0)
+                
+                is_question = "?" in latest_user_message or any(
+                    word in latest_user_message.lower() 
+                    for word in ["comment", "pourquoi", "qu'est", "est-ce", "vendez", "proposez", "tarif", "prix", "quel", "quelles", "combien"]
+                )
+                
+                if max_score < 0.67 and is_question:
+                    is_off_topic = True
+                elif chunks and max_score >= 0.67:
                     rag_context = "\n\nInformations complémentaires issues de la base de connaissances :\n" + "\n---\n".join(chunks)
             except Exception as ex:
                 print(f"[RAG] Error retrieving context: {ex}")
-                
-        # Build messages for LLM
-        system_prompt_with_context = SYSTEM_PROMPT
-        if rag_context:
-            system_prompt_with_context += rag_context
-            
-        chat_messages = [SystemMessage(content=system_prompt_with_context)]
-        for msg in messages_list:
-            if msg["role"] == "user":
-                chat_messages.append(HumanMessage(content=msg["content"]))
-            elif msg["role"] == "assistant":
-                chat_messages.append(AIMessage(content=msg["content"]))
                 
         # Add user message and temporary assistant response to messages for extraction
         temp_messages = messages_list.copy() if messages_list else []
@@ -293,39 +292,69 @@ def process_message_node(state: GraphState) -> Dict[str, Any]:
         fallback_llm = False
         fallback_ext = False
         
-        def run_llm():
-            try:
-                resp = llm.invoke(chat_messages)
-                return resp.content, False
-            except Exception as e:
-                err_str = str(e)
-                if "429" in err_str or "quota" in err_str.lower() or "resource_exhausted" in err_str.lower():
-                    return get_mock_agent_response(messages_list), True
-                raise e
-                
-        def run_extraction():
-            try:
-                return extract_lead_info_from_history(temp_messages), False
-            except Exception as e:
-                err_str = str(e)
-                if "429" in err_str or "quota" in err_str.lower() or "resource_exhausted" in err_str.lower():
-                    return extract_lead_info_fallback(temp_messages), True
-                raise e
-                
-        with ThreadPoolExecutor(max_workers=2) as executor:
-            future_llm = executor.submit(run_llm)
-            future_ext = executor.submit(run_extraction)
+        if is_off_topic:
+            response_text = "Je n'ai pas cette information précise, mais un de nos conseillers pourra vous répondre."
+            fallback_llm = False
             
+            def run_extraction():
+                try:
+                    return extract_lead_info_from_history(temp_messages), False
+                except Exception as e:
+                    err_str = str(e)
+                    if "429" in err_str or "quota" in err_str.lower() or "resource_exhausted" in err_str.lower():
+                        return extract_lead_info_fallback(temp_messages), True
+                    raise e
             try:
-                response_text, fallback_llm = future_llm.result()
-            except Exception as e:
-                raise e
-                
-            try:
-                extracted, fallback_ext = future_ext.result()
+                extracted, fallback_ext = run_extraction()
             except Exception as e:
                 extracted = extract_lead_info_fallback(temp_messages)
                 fallback_ext = True
+        else:
+            # Build messages for LLM
+            system_prompt_with_context = SYSTEM_PROMPT
+            if rag_context:
+                system_prompt_with_context += rag_context
+                
+            chat_messages = [SystemMessage(content=system_prompt_with_context)]
+            for msg in messages_list:
+                if msg["role"] == "user":
+                    chat_messages.append(HumanMessage(content=msg["content"]))
+                elif msg["role"] == "assistant":
+                    chat_messages.append(AIMessage(content=msg["content"]))
+
+            def run_llm():
+                try:
+                    resp = llm.invoke(chat_messages)
+                    return resp.content, False
+                except Exception as e:
+                    err_str = str(e)
+                    if "429" in err_str or "quota" in err_str.lower() or "resource_exhausted" in err_str.lower():
+                        return get_mock_agent_response(messages_list), True
+                    raise e
+                    
+            def run_extraction():
+                try:
+                    return extract_lead_info_from_history(temp_messages), False
+                except Exception as e:
+                    err_str = str(e)
+                    if "429" in err_str or "quota" in err_str.lower() or "resource_exhausted" in err_str.lower():
+                        return extract_lead_info_fallback(temp_messages), True
+                    raise e
+                    
+            with ThreadPoolExecutor(max_workers=2) as executor:
+                future_llm = executor.submit(run_llm)
+                future_ext = executor.submit(run_extraction)
+                
+                try:
+                    response_text, fallback_llm = future_llm.result()
+                except Exception as e:
+                    raise e
+                    
+                try:
+                    extracted, fallback_ext = future_ext.result()
+                except Exception as e:
+                    extracted = extract_lead_info_fallback(temp_messages)
+                    fallback_ext = True
                 
         is_mock_fallback = fallback_llm or fallback_ext
         

@@ -136,10 +136,10 @@ class RagIndex:
             # Fallback to empty embeddings
             self.embeddings = [[] for _ in self.chunks]
 
-    def retrieve(self, query: str, top_n: int = 2) -> List[str]:
-        """Retrieve the top N most relevant chunks for a query."""
+    def retrieve(self, query: str, top_n: int = 2) -> Dict[str, Any]:
+        """Retrieve the top N most relevant chunks and the max similarity score."""
         if not self.chunks or not self.embeddings:
-            return []
+            return {"chunks": [], "max_score": 0.0}
             
         # Get query embedding
         try:
@@ -150,7 +150,7 @@ class RagIndex:
             query_embedding = res["embedding"]
         except Exception as e:
             print(f"[RAG] Error generating query embedding: {e}")
-            return []
+            return {"chunks": [], "max_score": 0.0}
             
         # Calculate similarity with all chunks
         scores = []
@@ -164,5 +164,6 @@ class RagIndex:
         scores.sort(key=lambda x: x[0], reverse=True)
         
         # Get top N chunks
+        max_score = scores[0][0] if scores else 0.0
         retrieved = [chunk for _, chunk in scores[:top_n]]
-        return retrieved
+        return {"chunks": retrieved, "max_score": max_score}
