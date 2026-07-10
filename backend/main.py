@@ -3,8 +3,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from backend.config import CORS_ORIGINS
-from backend.routes import leads, chat
+from backend.routes import leads, chat, dashboard
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -25,9 +26,15 @@ app.add_middleware(
 # Include routers
 app.include_router(leads.router, prefix="/leads", tags=["leads"])
 app.include_router(chat.router, prefix="/chat", tags=["chat"])
+app.include_router(dashboard.router, prefix="/dashboard", tags=["dashboard"])
 
 # Mount static files for Chat UI
 app.mount("/chat-ui", StaticFiles(directory="frontend", html=True), name="frontend")
+
+@app.get("/dashboard", tags=["dashboard"])
+async def get_dashboard():
+    """Serve dashboard HTML page."""
+    return FileResponse("frontend/dashboard.html")
 
 @app.get("/", tags=["health"])
 async def root():
