@@ -55,3 +55,35 @@ class AirtableClient:
         data = self.list_records(table_name, params=params)
         records = data.get("records", [])
         return records[0] if records else None
+
+    def find_duplicate_lead(
+        self,
+        table_name: str,
+        email: Optional[str] = None,
+        phone: Optional[str] = None,
+        ean: Optional[str] = None,
+        phone_field: str = "Téléphone",
+        ean_field: str = "Code EAN",
+        email_field: str = "Email",
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Check for a duplicate lead by Email, then Phone, then EAN (in that priority order).
+        Centralizes the dedup rule so it is defined only once.
+        Returns the existing record dict if found, else None.
+        """
+        if email:
+            existing = self.find_by_field(table_name, email_field, email)
+            if existing:
+                return existing
+
+        if phone:
+            existing = self.find_by_field(table_name, phone_field, phone)
+            if existing:
+                return existing
+
+        if ean:
+            existing = self.find_by_field(table_name, ean_field, ean)
+            if existing:
+                return existing
+
+        return None

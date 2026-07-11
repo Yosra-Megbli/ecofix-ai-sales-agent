@@ -36,13 +36,14 @@ async def get_dashboard():
     """Serve dashboard HTML page."""
     return FileResponse("frontend/dashboard.html")
 
-# Root static files mount to serve assets for root-level routes
-app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend_root")
-
-@app.get("/", tags=["health"])
-async def root():
+@app.get("/health", tags=["health"])
+async def health():
     """Health check endpoint."""
     return {"message": "AI Sales Agent API is running", "version": "0.1.0"}
+
+# Root static files mount to serve assets for root-level routes
+# (must stay LAST so /health, /dashboard, /chat-ui above take priority)
+app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend_root")
 
 if __name__ == "__main__":
     import uvicorn

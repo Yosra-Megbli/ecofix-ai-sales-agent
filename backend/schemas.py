@@ -17,6 +17,9 @@ class LeadBase(BaseModel):
     score_ia: Optional[float] = Field(None, alias="Score IA")
     last_contacted: Optional[datetime] = Field(None, alias="Dernier contact")
     next_action: Optional[str] = Field(None, alias="Prochaine action")
+    date_of_birth: Optional[str] = Field(None, alias="Date de naissance")
+    desire_to_change: Optional[str] = Field(None, alias="Désir de changement")
+    is_eligible: Optional[bool] = Field(None, alias="Éligible")
 
     class Config:
         populate_by_name = True
@@ -41,6 +44,9 @@ class LeadReadBase(BaseModel):
     score_ia: Optional[float] = Field(None, alias="Score IA")
     last_contacted: Optional[datetime] = Field(None, alias="Dernier contact")
     next_action: Optional[str] = Field(None, alias="Prochaine action")
+    date_of_birth: Optional[str] = Field(None, alias="Date de naissance")
+    desire_to_change: Optional[str] = Field(None, alias="Désir de changement")
+    is_eligible: Optional[bool] = Field(None, alias="Éligible")
 
     class Config:
         populate_by_name = True

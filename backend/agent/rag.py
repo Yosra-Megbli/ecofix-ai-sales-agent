@@ -4,6 +4,7 @@ import os
 import re
 import json
 import math
+import time
 import hashlib
 from typing import List, Dict, Any, Optional
 import google.generativeai as genai
@@ -32,7 +33,7 @@ class RagIndex:
     
     def __init__(
         self,
-        knowledge_base_path: str = "docs/ecofix-knowledge-base.md",
+        knowledge_base_path: str = "docs/knowledge_base",
         cache_path: str = "backend/agent/rag_cache.json"
     ):
         self.kb_path = knowledge_base_path
@@ -44,41 +45,60 @@ class RagIndex:
         if not os.path.exists(self.kb_path):
             return ""
         hasher = hashlib.sha256()
-        with open(self.kb_path, 'rb') as f:
-            buf = f.read()
-            hasher.update(buf)
+        if os.path.isdir(self.kb_path):
+            # Sort files to ensure deterministic hashing
+            for root, _, files in os.walk(self.kb_path):
+                for file in sorted(files):
+                    if not file.endswith(".md"):
+                        continue
+                    file_path = os.path.join(root, file)
+                    hasher.update(file.encode('utf-8'))
+                    with open(file_path, 'rb') as f:
+                        hasher.update(f.read())
+        else:
+            with open(self.kb_path, 'rb') as f:
+                hasher.update(f.read())
         return hasher.hexdigest()
         
     def parse_chunks(self) -> List[str]:
-        """Parse markdown file into sections and individual FAQ questions."""
+        """Parse markdown files into chunks."""
         if not os.path.exists(self.kb_path):
             return []
             
-        with open(self.kb_path, "r", encoding="utf-8") as f:
-            content = f.read()
+        files_to_parse = []
+        if os.path.isdir(self.kb_path):
+            for root, _, files in os.walk(self.kb_path):
+                for file in sorted(files):
+                    if file.endswith(".md"):
+                        files_to_parse.append(os.path.join(root, file))
+        else:
+            files_to_parse.append(self.kb_path)
             
         chunks = []
-        
-        # Split by markdown headers ## or ###
-        sections = re.split(r'\n(?=#{2,3}\s)', content)
-        
-        for section in sections:
-            section = section.strip()
-            if not section:
-                continue
+        for file_path in files_to_parse:
+            try:
+                with open(file_path, "r", encoding="utf-8") as f:
+                    content = f.read()
                 
-            # Check if it's the FAQ section
-            if "## FAQ type" in section or "FAQ type" in section:
-                # FAQ section contains bold questions: **Question?**
-                # Split by the bold questions
-                faq_parts = re.split(r'\n(?=\*\*[^*]+\*\*\n?)', section)
-                for part in faq_parts:
-                    part = part.strip()
-                    if not part or "## FAQ type" in part:
+                # Split by markdown headers ## or ###
+                sections = re.split(r'\n(?=#{2,3}\s)', content)
+                for section in sections:
+                    section = section.strip()
+                    if not section:
                         continue
-                    chunks.append(part)
-            else:
-                chunks.append(section)
+                    
+                    # Special parsing for FAQ questions if it's the FAQ file
+                    if "faq.md" in file_path.lower() or "## FAQ type" in section or "FAQ type" in section:
+                        faq_parts = re.split(r'\n(?=\*\*[^*]+\*\*\n?)', section)
+                        for part in faq_parts:
+                            part = part.strip()
+                            if not part or "## FAQ type" in part:
+                                continue
+                            chunks.append(part)
+                    else:
+                        chunks.append(section)
+            except Exception as e:
+                print(f"[RAG] Error parsing {file_path}: {e}")
                 
         return chunks
 
@@ -110,15 +130,23 @@ class RagIndex:
             self.embeddings = []
             return
             
-        # Call Gemini API to batch generate embeddings
+        # Call Gemini API to generate embeddings, batching to respect free-tier quota
         try:
             print(f"[RAG] Generating embeddings for {len(self.chunks)} chunks...")
-            res = genai.embed_content(
-                model="models/gemini-embedding-001",
-                content=self.chunks
-            )
-            # res["embedding"] is a list of embeddings
-            self.embeddings = res["embedding"]
+            batch_size = 90
+            all_embeddings = []
+            for i in range(0, len(self.chunks), batch_size):
+                batch = self.chunks[i:i + batch_size]
+                print(f"[RAG] Embedding batch {i // batch_size + 1} ({len(batch)} chunks)...")
+                res = genai.embed_content(
+                    model="models/gemini-embedding-001",
+                    content=batch
+                )
+                all_embeddings.extend(res["embedding"])
+                if i + batch_size < len(self.chunks):
+                    time.sleep(60)
+            # self.embeddings is the full list of embeddings
+            self.embeddings = all_embeddings
             
             # Save to cache
             cache_data = {

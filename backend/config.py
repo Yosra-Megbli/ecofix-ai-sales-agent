@@ -18,3 +18,7 @@ CORS_ORIGINS = [
     "http://127.0.0.1:3000",
     "http://127.0.0.1:8000",
 ]
+
+# Telegram Bot token — only required when running the Telegram bot process.
+# The FastAPI server starts normally even if this variable is absent.
+TELEGRAM_BOT_TOKEN: str = os.getenv("TELEGRAM_BOT_TOKEN", "")

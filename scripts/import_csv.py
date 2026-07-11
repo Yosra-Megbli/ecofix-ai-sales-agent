@@ -39,13 +39,13 @@ def import_csv(path: str, airtable_table: str = "Leads"):
                 skipped += 1
                 continue
 
-            existing = None
-            if row.get("Email"):
-                existing = client.find_by_field(airtable_table, "Email", row.get("Email"))
-            if not existing and row.get("Téléphone"):
-                existing = client.find_by_field(airtable_table, "Téléphone", normalize_phone(row.get("Téléphone")))
-            if not existing and row.get("Code EAN"):
-                existing = client.find_by_field(airtable_table, "Code EAN", row.get("Code EAN"))
+            phone_normalized = normalize_phone(row.get("Téléphone")) if row.get("Téléphone") else None
+            existing = client.find_duplicate_lead(
+                airtable_table,
+                email=row.get("Email"),
+                phone=phone_normalized,
+                ean=row.get("Code EAN"),
+            )
 
             if existing:
                 print("Duplicate found, skipping:", row.get("Email") or row.get("Téléphone"))

@@ -1,0 +1,101 @@
+Nom,Prénom,Email,Téléphone,Adresse,Ville,Code EAN,Fournisseur actuel,Statut
+Benali,Michel,michel.benali0@example.com,+32485315839,Rue de la Montagne 45,Charleroi,549344430995472088,Mega,New
+Claes,Anissa,anissa.claes1@example.com,+32427491772,Meir 21,Anvers,1346679516680,Mega,New
+Dupont,Michel,michel.dupont2@example.com,+32480563609,Grand Place 1,Mons,548359015726578484,TotalEnergies,New
+Mertens,Yasmine,yasmine.mertens3@example.com,+32496836526,Steenstraat 8,Bruges,548017136991951873,Eneco,New
+Claes,Sophie,sophie.claes4@example.com,+32428664732,Steenstraat 8,Bruges,544983637116802539,TotalEnergies,New
+Benali,Michel,michel.benali5@example.com,+32437605158,Veldstraat 10,Gand,543331366095477607,Luminus,New
+Lambert,Marc,marc.lambert6@example.com,+32467487218,Grand Place 1,Mons,541438583062639343,Eneco,New
+Peeters,Sophie,sophie.peeters7@example.com,+32478989274,Rue de la Cathédrale 12,Liège,548503506687531721,Luminus,New
+Benali,Sarah,sarah.benali8@example.com,+32488166556,Rue de l'Ange 5,Namur,542506535278028664,Eneco,New
+Janssens,Sarah,sarah.janssens9@example.com,+32455834037,Rue de l'Ange 5,Namur,543558236691460020,TotalEnergies,New
+Barthélemy,Sophie,sophie.barthélemy10@example.com,+32488297915,Meir 21,Anvers,540704561825764124,Engie,New
+Janssens,Thomas,thomas.janssens11@example.com,+32461053713,Meir 21,Anvers,544712922509231020,TotalEnergies,New
+Dupont,Lucas,lucas.dupont12@example.com,+32400268840,Veldstraat 10,Gand,549685163432840650,Mega,New
+Gérard,Charlotte,charlotte.gérard13@example.com,+32417392952,Chaussée de Wavre 150,Ixelles,549901946568665329,TotalEnergies,New
+Gérard,Michel,michel.gérard14@example.com,+32421485657,Veldstraat 10,Gand,545939337983083423,TotalEnergies,New
+Benali,Yasmine,yasmine.benali15@example.com,+32400032088,Rue de la Cathédrale 12,Liège,543317331228834946,TotalEnergies,New
+Janssens,Charlotte,charlotte.janssens16@example.com,+32424985266,Rue de la Cathédrale 12,Liège,545696957487887387,Luminus,New
+Benali,Michel,michel.benali17@example.com,+32465361176,Meir 21,Anvers,1503891161072,Eneco,New
+Maes,Sophie,sophie.maes18@example.com,+32443494049,Rue de la Cathédrale 12,Liège,545127523490598959,TotalEnergies,New
+Barthélemy,Lucas,lucas.barthélemy19@example.com,+32431192642,Veldstraat 10,Gand,543437813090698636,TotalEnergies,New
+Gérard,Lucas,lucas.gérard20@example.com,+32405820824,Rue de la Cathédrale 12,Liège,544415577651336646,TotalEnergies,New
+Barthélemy,Yasmine,yasmine.barthélemy21@example.com,+32463116112,Rue de la Montagne 45,Charleroi,7682079997015,Mega,New
+Benali,Marc,marc.benali22@example.com,+32427940205,Rue de la Montagne 45,Charleroi,544493451814550558,Luminus,New
+Gérard,Anissa,anissa.gérard23@example.com,+32469685429,Rue de l'Ange 5,Namur,544603747263195848,Mega,New
+Lambert,Yasmine,yasmine.lambert24@example.com,+32409124426,Steenstraat 8,Bruges,542742226879885705,Mega,New
+Dupont,Pierre,pierre.dupont25@example.com,+32471544748,Grand Place 1,Mons,543032733729369348,Eneco,New
+Peeters,Marc,marc.peeters26@example.com,+32491065502,Rue de la Cathédrale 12,Liège,548280633371765312,Mega,New
+Janssens,Yasmine,yasmine.janssens27@example.com,+32472199037,Steenstraat 8,Bruges,542408677009608368,Luminus,New
+Claes,Pierre,pierre.claes28@example.com,+32442973468,Grand Place 1,Mons,540491616447487880,Luminus,New
+Maes,Emma,emma.maes29@example.com,+32469246650,Rue de la Montagne 45,Charleroi,549979371453069725,Eneco,New
+Lambert,Sophie,sophie.lambert30@example.com,+32429217501,Steenstraat 8,Bruges,545577798099963373,Luminus,New
+Lambert,Emma,emma.lambert31@example.com,+32460267642,Chaussée de Wavre 150,Ixelles,544279525590114532,Eneco,New
+Mertens,Marc,marc.mertens32@example.com,+32439710559,Steenstraat 8,Bruges,541928496256468052,Mega,New
+Maes,Jean,jean.maes33@example.com,+32406012332,Steenstraat 8,Bruges,549122158684638648,Luminus,New
+Claes,Lucas,lucas.claes34@example.com,+32458208469,Rue de la Montagne 45,Charleroi,543168878478813100,TotalEnergies,New
+Maes,Jean,jean.maes35@example.com,+32491955045,Rue de la Cathédrale 12,Liège,547213022021521675,Eneco,New
+Maes,Lucas,lucas.maes36@example.com,+32430026165,Steenstraat 8,Bruges,541294029330719740,TotalEnergies,New
+Claes,Yasmine,yasmine.claes37@example.com,+32454678976,Avenue Brugmann 300,Uccle,546720191828461577,Luminus,New
+Gérard,Michel,michel.gérard38@example.com,+32401850491,Rue de la Cathédrale 12,Liège,545077918974564896,Eneco,New
+Peeters,Marc,marc.peeters39@example.com,+32462611767,Meir 21,Anvers,540703052612107444,TotalEnergies,New
+Peeters,Lucas,lucas.peeters40@example.com,+32484272814,Rue de la Montagne 45,Charleroi,548455808536595998,Eneco,New
+Lambert,Marc,marc.lambert41@example.com,+32424973894,Steenstraat 8,Bruges,545372582358524341,TotalEnergies,New
+Dupont,Yasmine,yasmine.dupont42@example.com,+32421725070,Avenue Brugmann 300,Uccle,549950625187293419,Eneco,New
+Claes,Sophie,sophie.claes43@example.com,+32460642640,Rue de la Montagne 45,Charleroi,542006290585557237,TotalEnergies,New
+Barthélemy,Pierre,pierre.barthélemy44@example.com,+32456760321,Veldstraat 10,Gand,541973871966875863,Mega,New
+Lambert,Anissa,anissa.lambert45@example.com,+32469185627,Grand Place 1,Mons,543692084467200433,TotalEnergies,New
+Dupont,Michel,michel.dupont46@example.com,+32402362900,Avenue Brugmann 300,Uccle,542699655545107032,Luminus,New
+Peeters,Marc,marc.peeters47@example.com,+32481347429,Veldstraat 10,Gand,543018556586207209,TotalEnergies,New
+Gérard,Lucas,lucas.gérard48@example.com,+32484157177,Steenstraat 8,Bruges,544080511186140825,Engie,New
+Peeters,Michel,michel.peeters49@example.com,+32438843588,Grand Place 1,Mons,544947555786829842,Mega,New
+Benali,Yasmine,yasmine.benali50@example.com,+32480200345,Rue de l'Ange 5,Namur,541841920973660931,Engie,New
+Dupont,Anissa,anissa.dupont51@example.com,+32486703714,Grand Place 1,Mons,544845990131812430,Luminus,New
+Maes,Yasmine,yasmine.maes52@example.com,+32415195605,Veldstraat 10,Gand,546269493710347957,TotalEnergies,New
+Benali,Marc,marc.benali53@example.com,+32468687205,Meir 21,Anvers,548549131832415731,TotalEnergies,New
+Peeters,Sarah,sarah.peeters54@example.com,+32447896595,Veldstraat 10,Gand,544088919103184986,TotalEnergies,New
+Gérard,Emma,emma.gérard55@example.com,+32485205345,Rue de l'Ange 5,Namur,549796848680341811,TotalEnergies,New
+Dupont,Yasmine,yasmine.dupont56@example.com,+32478396350,Grand Place 1,Mons,543098564887321874,TotalEnergies,New
+Claes,Yasmine,yasmine.claes57@example.com,+32409888998,Grand Place 1,Mons,549668672090340872,Engie,New
+Mertens,Charlotte,charlotte.mertens58@example.com,+32418374240,Avenue Brugmann 300,Uccle,546871915277745361,Luminus,New
+Dupont,Pierre,pierre.dupont59@example.com,+32478492738,Rue de la Cathédrale 12,Liège,549939927999659921,Engie,New
+Benali,Michel,michel.benali60@example.com,+32436017684,Chaussée de Wavre 150,Ixelles,548861588086120344,TotalEnergies,New
+Mertens,Pierre,pierre.mertens61@example.com,+32465121524,Grand Place 1,Mons,547707475384593477,Mega,New
+Gérard,Jean,jean.gérard62@example.com,+32406749129,Rue de la Montagne 45,Charleroi,549796481278269903,Eneco,New
+Barthélemy,Lucas,lucas.barthélemy63@example.com,+32430848329,Rue de l'Ange 5,Namur,546038645374490486,Engie,New
+Mertens,Jean,jean.mertens64@example.com,+32458956708,Rue de la Montagne 45,Charleroi,544999311757344257,Eneco,New
+Janssens,Charlotte,charlotte.janssens65@example.com,+32465868410,Rue de l'Ange 5,Namur,545997453069880220,Luminus,New
+Peeters,Pierre,pierre.peeters66@example.com,+32417745232,Meir 21,Anvers,542363080529911176,Engie,New
+Benali,Marc,marc.benali67@example.com,+32464902700,Chaussée de Wavre 150,Ixelles,541464693289137612,Luminus,New
+Lambert,Anissa,anissa.lambert68@example.com,+32448393146,Grand Place 1,Mons,546608154670229790,Eneco,New
+Maes,Marc,marc.maes69@example.com,+32472702878,Rue de la Cathédrale 12,Liège,549567310139075761,Mega,New
+Maes,Sarah,sarah.maes70@example.com,+32486103721,Rue de la Cathédrale 12,Liège,542566994389750900,Eneco,New
+Barthélemy,Sophie,sophie.barthélemy71@example.com,+32407059910,Chaussée de Wavre 150,Ixelles,540689749135964786,TotalEnergies,New
+Lambert,Yasmine,yasmine.lambert72@example.com,+32431203358,Rue de la Montagne 45,Charleroi,540987016127355145,Engie,New
+Mertens,Jean,jean.mertens73@example.com,+32413952572,Rue de l'Ange 5,Namur,546901667485125139,Engie,New
+Barthélemy,Michel,michel.barthélemy74@example.com,+32445599946,Rue de l'Ange 5,Namur,540992114217002733,Eneco,New
+Maes,Michel,michel.maes75@example.com,+32483149673,Rue de l'Ange 5,Namur,547436514571236253,Engie,New
+Gérard,Lucas,lucas.gérard76@example.com,+32408135947,Rue de l'Ange 5,Namur,540221647647390416,Eneco,New
+Claes,Jean,jean.claes77@example.com,+32492147798,Rue de l'Ange 5,Namur,9228111356934,Mega,New
+Maes,Lucas,lucas.maes78@example.com,+32478338567,Veldstraat 10,Gand,544114789172481766,Mega,New
+Mertens,Thomas,thomas.mertens79@example.com,+32445582729,Rue de la Cathédrale 12,Liège,547997986366498687,Luminus,New
+Janssens,Yasmine,yasmine.janssens80@example.com,+32404570665,Rue de l'Ange 5,Namur,542738388103039594,TotalEnergies,New
+Lambert,Sarah,sarah.lambert81@example.com,+32488160141,Veldstraat 10,Gand,541090847648630434,Mega,New
+Janssens,Michel,michel.janssens82@example.com,+32437901116,Steenstraat 8,Bruges,545468390720225457,Mega,New
+Janssens,Jean,jean.janssens83@example.com,+32452708045,Rue de l'Ange 5,Namur,545116305571117141,TotalEnergies,New
+Dupont,Charlotte,charlotte.dupont84@example.com,+32418444235,Meir 21,Anvers,540204954080360933,Engie,New
+Benali,Yasmine,yasmine.benali85@example.com,+32428026324,Rue de la Cathédrale 12,Liège,543832893013381008,Luminus,New
+Claes,Anissa,anissa.claes86@example.com,+32430085625,Grand Place 1,Mons,3442717949499,Mega,New
+Dupont,Lucas,lucas.dupont87@example.com,+32432930296,Grand Place 1,Mons,547639553718811024,Engie,New
+Lambert,Pierre,pierre.lambert88@example.com,+32453982624,Rue Royale 10,Bruxelles,546016602898736557,Mega,New
+Janssens,Yasmine,yasmine.janssens89@example.com,+32485762430,Meir 21,Anvers,544868402827773952,TotalEnergies,New
+Dupont,Lucas,lucas.dupont90@example.com,+32469758035,Veldstraat 10,Gand,543000813232990049,Engie,New
+Maes,Thomas,thomas.maes91@example.com,+32450201518,Grand Place 1,Mons,543321057121168609,Engie,New
+Gérard,Pierre,pierre.gérard92@example.com,+32467764810,Rue de la Montagne 45,Charleroi,545007659926074781,Engie,New
+Gérard,Sophie,sophie.gérard93@example.com,+32411776889,Chaussée de Wavre 150,Ixelles,548299642401420496,Engie,New
+Janssens,Thomas,thomas.janssens94@example.com,+32426943332,Grand Place 1,Mons,545452976602520559,Mega,New
+Barthélemy,Charlotte,charlotte.barthélemy95@example.com,+32416912064,Steenstraat 8,Bruges,541124470510660369,Engie,New
+Lambert,Yasmine,yasmine.lambert96@example.com,+32478092981,Rue de la Montagne 45,Charleroi,541472191090623886,Mega,New
+Barthélemy,Charlotte,charlotte.barthélemy97@example.com,+32463104196,Rue de la Montagne 45,Charleroi,547701812639112688,Luminus,New
+Barthélemy,Marc,marc.barthélemy98@example.com,+32496900653,Grand Place 1,Mons,8312812672895,Eneco,New
+Benali,Anissa,anissa.benali99@example.com,+32411960265,Grand Place 1,Mons,547249254547312208,Eneco,New

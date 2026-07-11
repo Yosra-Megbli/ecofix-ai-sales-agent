@@ -37,6 +37,9 @@ def _airtable_record_to_lead_read(record: dict) -> LeadRead:
         "Score IA": fields.get("Score IA"),
         "Dernier contact": fields.get("Dernier contact"),
         "Prochaine action": fields.get("Prochaine action"),
+        "Date de naissance": fields.get("Date de naissance"),
+        "Désir de changement": fields.get("Désir de changement"),
+        "Éligible": fields.get("Éligible"),
     })
 
 
@@ -96,21 +99,14 @@ async def create_lead(lead: LeadCreate):
         # Get the lead data as dict for validation
         lead_data = lead.model_dump(by_alias=True, exclude_none=True)
         
-        # Check for duplicates: Email, Phone, EAN
-        existing = None
-        
-        if lead_data.get("Email"):
-            existing = client.find_by_field(AIRTABLE_TABLE, "Email", lead_data.get("Email"))
-        
-        if not existing and lead_data.get("Téléphone"):
-            existing = client.find_by_field(
-                AIRTABLE_TABLE,
-                "Téléphone",
-                normalize_phone(lead_data.get("Téléphone"))
-            )
-        
-        if not existing and lead_data.get("Code EAN"):
-            existing = client.find_by_field(AIRTABLE_TABLE, "Code EAN", lead_data.get("Code EAN"))
+        # Check for duplicates: Email, Phone, EAN (centralized rule)
+        phone_normalized = normalize_phone(lead_data.get("Téléphone")) if lead_data.get("Téléphone") else None
+        existing = client.find_duplicate_lead(
+            AIRTABLE_TABLE,
+            email=lead_data.get("Email"),
+            phone=phone_normalized,
+            ean=lead_data.get("Code EAN"),
+        )
         
         if existing:
             raise HTTPException(
@@ -173,4 +169,3 @@ async def update_lead(lead_id: str, lead: LeadUpdate):
         if "404" in str(e) or "NOT_FOUND" in str(e):
             raise HTTPException(status_code=404, detail=f"Lead not found: {lead_id}")
         raise HTTPException(status_code=500, detail=f"Error updating lead: {str(e)}")
-

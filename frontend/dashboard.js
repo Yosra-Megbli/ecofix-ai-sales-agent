@@ -8,6 +8,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const valTotalLeads = document.getElementById('val-total-leads');
     const valTotalConv = document.getElementById('val-total-conv');
     const valConvRate = document.getElementById('val-conv-rate');
+    const valQualifiedLeads = document.getElementById('val-qualified-leads');
+    const valUnqualifiedLeads = document.getElementById('val-unqualified-leads');
+    const valOpenConv = document.getElementById('val-open-conv');
+    const valClosedConv = document.getElementById('val-closed-conv');
     const errorBanner = document.getElementById('error-banner-id');
     const errorText = document.getElementById('error-text-id');
     const chartLoader = document.getElementById('chart-loader-id');
@@ -78,6 +82,10 @@ document.addEventListener('DOMContentLoaded', () => {
             updateMetric(valTotalLeads, data.total_leads);
             updateMetric(valTotalConv, data.total_conversations);
             updateMetric(valConvRate, data.conversion_rate, '%');
+            updateMetric(valQualifiedLeads, data.qualified_leads);
+            updateMetric(valUnqualifiedLeads, data.unqualified_leads);
+            updateMetric(valOpenConv, data.open_conversations);
+            updateMetric(valClosedConv, data.closed_conversations);
 
             // 2. Build Pipeline Data arrays
             const counts = data.status_counts || {};
@@ -146,10 +154,12 @@ document.addEventListener('DOMContentLoaded', () => {
             errorBanner.classList.remove('hidden');
             
             // Remove skeleton from cards and set error indicators
-            [valTotalLeads, valTotalConv, valConvRate].forEach(el => {
-                el.classList.remove('loading-skeleton');
-                el.textContent = "N/A";
-                el.style.color = "var(--text-light)";
+            [valTotalLeads, valTotalConv, valConvRate, valQualifiedLeads, valUnqualifiedLeads, valOpenConv, valClosedConv].forEach(el => {
+                if (el) {
+                    el.classList.remove('loading-skeleton');
+                    el.textContent = "N/A";
+                    el.style.color = "var(--text-light)";
+                }
             });
 
             // Clear table loader
