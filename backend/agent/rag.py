@@ -7,15 +7,22 @@ import math
 import time
 import hashlib
 from typing import List, Dict, Any, Optional
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# Configure globally
-api_key = os.getenv("GOOGLE_API_KEY")
-if api_key:
-    genai.configure(api_key=api_key, transport="rest")
+_client_instance = None
+
+def _get_client():
+    global _client_instance
+    if _client_instance is None:
+        api_key = os.getenv("GOOGLE_API_KEY")
+        if not api_key:
+            raise ValueError("GOOGLE_API_KEY not set in environment")
+        _client_instance = genai.Client(api_key=api_key)
+    return _client_instance
 
 
 def cosine_similarity(v1: List[float], v2: List[float]) -> float:
@@ -138,11 +145,12 @@ class RagIndex:
             for i in range(0, len(self.chunks), batch_size):
                 batch = self.chunks[i:i + batch_size]
                 print(f"[RAG] Embedding batch {i // batch_size + 1} ({len(batch)} chunks)...")
-                res = genai.embed_content(
-                    model="models/gemini-embedding-001",
-                    content=batch
+                client = _get_client()
+                res = client.models.embed_content(
+                    model="text-embedding-004",
+                    contents=batch,
                 )
-                all_embeddings.extend(res["embedding"])
+                all_embeddings.extend([e.values for e in res.embeddings])
                 if i + batch_size < len(self.chunks):
                     time.sleep(60)
             # self.embeddings is the full list of embeddings
@@ -171,11 +179,12 @@ class RagIndex:
             
         # Get query embedding
         try:
-            res = genai.embed_content(
-                model="models/gemini-embedding-001",
-                content=query
+            client = _get_client()
+            res = client.models.embed_content(
+                model="text-embedding-004",
+                contents=query,
             )
-            query_embedding = res["embedding"]
+            query_embedding = res.embeddings[0].values
         except Exception as e:
             print(f"[RAG] Error generating query embedding: {e}")
             return {"chunks": [], "max_score": 0.0}

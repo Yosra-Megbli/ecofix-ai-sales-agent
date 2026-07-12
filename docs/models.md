@@ -16,6 +16,8 @@ This document defines the Airtable tables and fields for the AI Sales Agent.
 - Score IA: number
 - Dernier contact: datetime
 - Prochaine action: string
+- Telegram Chat ID: string (identifiant numérique du chat Telegram, ex: "8867809811" — vide si le lead n'a pas encore interagi via Telegram)
+- Nombre de tentatives: number (compteur de relances envoyées — incrémenté par le scheduler de relance ; 0 par défaut)
 
 2) Conversations (table: `Conversations`)
 - Lead: link to Leads

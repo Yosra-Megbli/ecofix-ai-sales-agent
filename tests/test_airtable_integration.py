@@ -59,7 +59,9 @@ def test_new_qualified_lead_creation(mock_client_class):
         "Lead": ["recNewLead123"],
         "Date": ANY,
         "Message client": "Je veux changer de fournisseur",
-        "Réponse IA": "Parfait, nous créons votre fiche..."
+        "Réponse IA": "Parfait, nous créons votre fiche...",
+        "Intent détecté": "qualification",
+        "Résumé IA": ANY,
     })
     
     assert result["lead_id"] == "recNewLead123"

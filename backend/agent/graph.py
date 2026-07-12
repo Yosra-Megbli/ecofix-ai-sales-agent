@@ -8,7 +8,8 @@ from typing import Dict, Any, List, Optional
 from dotenv import load_dotenv
 load_dotenv()
 
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 
 from backend.agent.prompts import SYSTEM_PROMPT
@@ -16,23 +17,22 @@ from backend.agent.state import GraphState
 from backend.airtable_client import AirtableClient
 from backend.agent.rag import RagIndex
 
-# Configure globally
-api_key = os.getenv("GOOGLE_API_KEY")
-if api_key:
-    genai.configure(api_key=api_key, transport="rest")
-
-# Reuse model and RAG index instances globally to allow HTTP connection pooling
-_model_instance = None
+# Reuse client and RAG index instances globally
+_client_instance = None
 _rag_index = None
 
 def get_model():
-    global _model_instance
-    if _model_instance is None:
+    """Returns the genai client (kept for compatibility with callers)."""
+    return get_client()
+
+def get_client():
+    global _client_instance
+    if _client_instance is None:
         api_key = os.getenv("GOOGLE_API_KEY")
         if not api_key:
             raise ValueError("GOOGLE_API_KEY not set in environment")
-        _model_instance = genai.GenerativeModel(model_name="gemini-flash-latest")
-    return _model_instance
+        _client_instance = genai.Client(api_key=api_key)
+    return _client_instance
 
 def get_rag_index():
     global _rag_index
@@ -44,18 +44,31 @@ def get_rag_index():
 
 class SimpleGeminiWrapper:
     def invoke(self, messages):
-        # Convert LangChain messages to simple format
-        text_messages = []
+        client = get_client()
+
+        system_text = ""
+        history = []
+        pending_user = None
+
         for msg in messages:
-            text_messages.append(f"{msg.type}: {msg.content}")
-        
-        prompt = "\n".join(text_messages)
-        
-        # Call Gemini API using global model
-        model = get_model()
-        response = model.generate_content(prompt)
-        
-        # Return LangChain-compatible response
+            if msg.type == "system":
+                system_text = msg.content
+            elif msg.type == "human":
+                pending_user = msg.content
+            elif msg.type == "ai" and pending_user is not None:
+                history.append(types.Content(role="user", parts=[types.Part(text=pending_user)]))
+                history.append(types.Content(role="model", parts=[types.Part(text=msg.content)]))
+                pending_user = None
+
+        config = types.GenerateContentConfig(
+            system_instruction=system_text,
+        )
+        history.append(types.Content(role="user", parts=[types.Part(text=pending_user or "")]))
+        response = client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=history,
+            config=config,
+        )
         return AIMessage(content=response.text)
 
 _llm_instance = None
@@ -74,14 +87,13 @@ def get_llm():
 
 def extract_lead_info_from_history(messages: List[Dict[str, str]]) -> Dict[str, Any]:
     """Use Gemini to extract lead details from the conversation history."""
-    model = get_model()
-    
-    # Construct conversation transcript for LLM
+    client = get_client()
+
     history_text = ""
     for msg in messages:
         role = "Prospect" if msg["role"] == "user" else "Assistant"
         history_text += f"{role}: {msg['content']}\n"
-        
+
     prompt = f"""Tu es un extracteur d'informations de conversation. Analyse la conversation suivante entre l'Assistant et le Prospect.
 Extrais uniquement les informations de contact et de qualification du prospect sous la forme d'un objet JSON plat.
 
@@ -106,8 +118,7 @@ Règles importantes :
 Conversation :
 {history_text}
 """
-    # Let exception propagate so process_message_node can handle the fallback
-    response = model.generate_content(prompt)
+    response = client.models.generate_content(model="gemini-2.0-flash", contents=prompt)
     text = response.text.strip()
     if text.startswith("```"):
         lines = text.split("\n")
@@ -210,6 +221,10 @@ def extract_lead_info_fallback(messages: List[Dict[str, str]]) -> Dict[str, Any]
     # 9. Désir de changement
     if any(keyword in full_text_lower for keyword in ["change", "passer chez", "quitter", "rejoindre", "nouveau contrat", "souscrire"]):
         result["Desir_changement"] = "Oui"
+    elif any(keyword in full_text_lower for keyword in ["pas intéressé", "pas intéresse", "ne veux pas", "ne souhaite pas", "rester", "garde mon"]):
+        result["Desir_changement"] = "Non"
+    elif any(keyword in full_text_lower for keyword in ["peut-être", "peut etre", "je réfléchis", "je reflechis", "pas sûr", "pas sur", "indécis"]):
+        result["Desir_changement"] = "Indécis"
 
     # 10. Type d'énergie
     if "gaz" in full_text_lower and ("élec" in full_text_lower or "elec" in full_text_lower):
@@ -328,7 +343,7 @@ def check_eligibility(lead_info: Dict[str, Any]) -> Optional[bool]:
 
     # 4. Check desire to change
     desir = lead_info.get("Desir_changement")
-    if desir and desir.lower() in ["non", "no", "false"]:
+    if desir and desir in ["Non"]:
         return False
         
     # Check if we have the critical data to declare them eligible
@@ -374,9 +389,9 @@ def calculate_lead_score(lead_info: Dict[str, Any]) -> int:
         
     # 3. Purchase Intent (Max 50 pts)
     desir = lead_info.get("Desir_changement")
-    if desir and desir.lower() in ["oui", "yes", "true"]:
-        score += 20 # Wants to switch
-        score += 10 # Wants to compare (implied by wanting to switch/compare)
+    if desir == "Oui":
+        score += 20
+        score += 10
         
     # If EAN is provided, they request next step (implied, +10)
     if lead_info.get("Code_EAN"):
@@ -416,9 +431,9 @@ def intent_router_node(state: GraphState) -> Dict[str, Any]:
     user_messages = [m["content"] for m in messages_list if m["role"] == "user"]
     if not user_messages:
         return {"intent": "greeting"}
-        
+
     latest_message = user_messages[-1]
-    
+
     prompt = f"""Tu es un classifieur d'intentions utilisateur. Analyse le message suivant du client et classe-le dans EXACTEMENT UNE des catégories suivantes :
 - greeting : Si le client dit bonjour, salue, ou débute la conversation.
 - product_question : Si le client pose une question sur les offres d'Ecofix (Flexy, Motion, tarifs, gaz, électricité).
@@ -435,8 +450,8 @@ Message du client : "{latest_message}"
 Retourne uniquement le mot-clé de la catégorie en minuscule (ex: "faq", "objection", "qualification"). Sans aucun autre texte.
 """
     try:
-        model = get_model()
-        response = model.generate_content(prompt)
+        client = get_client()
+        response = client.models.generate_content(model="gemini-2.0-flash", contents=prompt)
         intent = response.text.strip().lower()
         intent = re.sub(r"[^a-z_]", "", intent)
         valid_intents = {
@@ -499,10 +514,23 @@ def generate_response_node(state: GraphState) -> Dict[str, Any]:
         lead_info = {}
     else:
         lead_info = lead_info.copy()
-        
+
     intent = state.get("intent")
     retrieved_sources = state.get("retrieved_sources") or []
-    
+
+    # Si la conversation est déjà complétée, répondre poliment sans relancer le closing
+    if state.get("conversation_completed"):
+        _COMPLETED_REPLIES = [
+            "Votre dossier est déjà complet. N'hésitez pas si vous avez d'autres questions ! 😊",
+            "Tout est en ordre de notre côté. Un conseiller vous contactera très prochainement.",
+            "Votre demande a bien été enregistrée. Avez-vous une question en attendant ?",
+        ]
+        turn = state.get("conversation_turn", 0)
+        reply = _COMPLETED_REPLIES[turn % len(_COMPLETED_REPLIES)]
+        new_messages = messages_list.copy()
+        new_messages.append({"role": "assistant", "content": reply})
+        return {"messages": new_messages, "lead_info": lead_info}
+
     response_text = ""
     
     if intent == "off_topic":
@@ -526,15 +554,18 @@ def generate_response_node(state: GraphState) -> Dict[str, Any]:
             llm = get_llm()
             res_msg = llm.invoke(chat_messages)
             response_text = res_msg.content
+            print("[AGENT MODE] ✅ Gemini réel")
         except Exception as e:
+            print(f"[AGENT MODE] ⚠️ MOCK activé — Gemini indisponible : {e}")
             response_text = get_mock_agent_response(messages_list)
             
     # Extract lead details
     try:
         extracted = extract_lead_info_from_history(messages_list)
+        print("[EXTRACTION] ✅ Gemini réel")
     except Exception as e:
+        print(f"[EXTRACTION] ⚠️ Fallback regex activé — {e}")
         extracted = extract_lead_info_fallback(messages_list)
-        print(f"[DEBUG EXTRACTION] {extracted}")
     # Strict validation rules
     EMAIL_VALID_REGEX = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
     PHONE_VALID_REGEX = re.compile(r"^\+?[\d\s-]{8,15}$")
@@ -704,12 +735,15 @@ def existing_qualification_node(state: GraphState) -> Dict[str, Any]:
     lead_info["Score_IA"] = score_ia
     
     conversation_stage = "Qualification"
+    conversation_completed = False
     if elig is True:
         conversation_stage = "Qualified"
         qualification_status = "Qualified"
+        conversation_completed = True
     elif elig is False:
         conversation_stage = "Rejected"
         qualification_status = "Rejected"
+        conversation_completed = True
     else:
         qualification_status = "Contacted"
         
@@ -722,8 +756,29 @@ def existing_qualification_node(state: GraphState) -> Dict[str, Any]:
         "lead_info": lead_info,
         "lead_score": score_ia,
         "qualification_status": qualification_status,
-        "conversation_stage": conversation_stage
+        "conversation_stage": conversation_stage,
+        "conversation_completed": conversation_completed
     }
+
+
+def _generate_conversation_summary(messages_list: List[Dict[str, str]], lead_info: Dict[str, Any]) -> str:
+    """Generate a short AI summary of the conversation for Airtable."""
+    prenom = lead_info.get("Prenom") or ""
+    nom = lead_info.get("Nom") or ""
+    fournisseur = lead_info.get("Fournisseur") or ""
+    ville = lead_info.get("Ville") or ""
+    score = lead_info.get("Score_IA", 0)
+    turn_count = sum(1 for m in messages_list if m["role"] == "user")
+    parts = [f"Conversation de {turn_count} échange(s)."]
+    if prenom or nom:
+        parts.append(f"Prospect : {prenom} {nom}".strip())
+    if fournisseur:
+        parts.append(f"Fournisseur actuel : {fournisseur}.")
+    if ville:
+        parts.append(f"Ville : {ville}.")
+    if score:
+        parts.append(f"Score IA : {score}/100.")
+    return " ".join(parts)
 
 
 def crm_sync_node(state: GraphState) -> Dict[str, Any]:
@@ -736,6 +791,7 @@ def crm_sync_node(state: GraphState) -> Dict[str, Any]:
     qualification_status = state.get("qualification_status") or "Contacted"
     score_ia = state.get("lead_score") or 0
     elig = lead_info.get("Eligible")
+    intent = state.get("intent") or ""
     
     has_email = bool(lead_info.get("Email"))
     has_phone = bool(lead_info.get("Telephone"))
@@ -759,7 +815,7 @@ def crm_sync_node(state: GraphState) -> Dict[str, Any]:
                 "Fournisseur actuel": lead_info.get("Fournisseur"),
                 "Code EAN": lead_info.get("Code_EAN"),
                 "Date de naissance": lead_info.get("Date_de_naissance"),
-                "Désir de changement": lead_info.get("Desir_changement"),
+                "Désir de changement": lead_info.get("Desir_changement") if lead_info.get("Desir_changement") in ("Oui", "Non", "Indécis") else None,
                 "Éligible": elig if elig is not None else False,
                 "Statut": qualification_status,
                 "Score IA": score_ia,
@@ -790,12 +846,17 @@ def crm_sync_node(state: GraphState) -> Dict[str, Any]:
             latest_user_message = user_msgs[-1]["content"] if user_msgs else ""
             response_text = messages_list[-1]["content"] if messages_list else ""
             
+            resume_ia = _generate_conversation_summary(messages_list, lead_info)
             conv_fields = {
                 "Lead": [lead_id],
                 "Date": date_str,
                 "Message client": latest_user_message,
                 "Réponse IA": response_text,
+                "Intent détecté": intent,
+                "Objection": latest_user_message if intent == "objection" else None,
+                "Résumé IA": resume_ia,
             }
+            conv_fields = {k: v for k, v in conv_fields.items() if v is not None}
             try:
                 airtable_client.create_record("Conversations", conv_fields)
             except Exception as ex:

@@ -9,15 +9,23 @@ from typing import Dict, Any
 _sessions: Dict[str, Dict[str, Any]] = {}
 
 
+def _fresh_state() -> Dict[str, Any]:
+    return {
+        "messages": [],
+        "conversation_turn": 0,
+        "lead_id": None,
+        "lead_info": {},
+        # Enrichment mode — True when the bot is collecting missing lead fields
+        "enrichment_mode": False,
+        "enrichment_record_id": None,  # Airtable record ID being enriched
+        "enrichment_pending_fields": [],  # ordered list of field keys still missing
+    }
+
+
 def get_session(session_id: str) -> Dict[str, Any]:
     """Return existing session or create a fresh one."""
     if session_id not in _sessions:
-        _sessions[session_id] = {
-            "messages": [],
-            "conversation_turn": 0,
-            "lead_id": None,
-            "lead_info": {},
-        }
+        _sessions[session_id] = _fresh_state()
     return _sessions[session_id]
 
 
@@ -28,12 +36,7 @@ def set_session(session_id: str, state: Dict[str, Any]) -> None:
 
 def reset_session(session_id: str) -> Dict[str, Any]:
     """Reset a session to its initial state and return it."""
-    _sessions[session_id] = {
-        "messages": [],
-        "conversation_turn": 0,
-        "lead_id": None,
-        "lead_info": {},
-    }
+    _sessions[session_id] = _fresh_state()
     return _sessions[session_id]
 
 

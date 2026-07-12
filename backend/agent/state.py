@@ -32,3 +32,4 @@ class GraphState(TypedDict):
     retrieved_sources: Optional[List[str]] # Chunks retrieved from knowledge base
     lead_score: Optional[int]       # Score between 0 and 100
     qualification_status: Optional[str] # Status e.g. "Qualified", "Follow-up", "Rejected"
+    conversation_completed: Optional[bool] # True once lead is fully qualified
